@@ -1,11 +1,13 @@
 # api documentation for  [cookie-session (v1.2.0)](https://github.com/expressjs/cookie-session)  [![npm package](https://img.shields.io/npm/v/npmdoc-cookie-session.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-cookie-session) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-cookie-session.svg)](https://travis-ci.org/npmdoc/node-npmdoc-cookie-session)
 #### cookie session middleware
 
-[![NPM](https://nodei.co/npm/cookie-session.png?downloads=true)](https://www.npmjs.com/package/cookie-session)
+[![NPM](https://nodei.co/npm/cookie-session.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/cookie-session)
 
-[![apidoc](https://npmdoc.github.io/node-npmdoc-cookie-session/build/screen-capture.buildNpmdoc.browser._2Fhome_2Ftravis_2Fbuild_2Fnpmdoc_2Fnode-npmdoc-cookie-session_2Ftmp_2Fbuild_2Fapidoc.html.png)](https://npmdoc.github.io/node-npmdoc-cookie-session/build..beta..travis-ci.org/apidoc.html)
+[![apidoc](https://npmdoc.github.io/node-npmdoc-cookie-session/build/screenCapture.buildCi.browser.apidoc.html.png)](https://npmdoc.github.io/node-npmdoc-cookie-session/build/apidoc.html)
 
-![package-listing](https://npmdoc.github.io/node-npmdoc-cookie-session/build/screen-capture.npmPackageListing.svg)
+![npmPackageListing](https://npmdoc.github.io/node-npmdoc-cookie-session/build/screenCapture.npmPackageListing.svg)
+
+![npmPackageDependencyTree](https://npmdoc.github.io/node-npmdoc-cookie-session/build/screenCapture.npmPackageDependencyTree.svg)
 
 
 
@@ -51,33 +53,26 @@
     "license": "MIT",
     "maintainers": [
         {
-            "name": "jongleberry",
-            "email": "jonathanrichardong@gmail.com"
+            "name": "jongleberry"
         },
         {
-            "name": "dougwilson",
-            "email": "doug@somethingdoug.com"
+            "name": "dougwilson"
         },
         {
-            "name": "tjholowaychuk",
-            "email": "tj@vision-media.ca"
+            "name": "tjholowaychuk"
         },
         {
-            "name": "mscdex",
-            "email": "mscdex@mscdex.net"
+            "name": "mscdex"
         },
         {
-            "name": "fishrock123",
-            "email": "fishrock123@rocketmail.com"
+            "name": "fishrock123"
         },
         {
-            "name": "defunctzombie",
-            "email": "shtylman@gmail.com"
+            "name": "defunctzombie"
         }
     ],
     "name": "cookie-session",
     "optionalDependencies": {},
-    "readme": "ERROR: No README data found!",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/expressjs/cookie-session.git"
@@ -96,10 +91,136 @@
 # <a name="apidoc.tableOfContents"></a>[table of contents](#apidoc.tableOfContents)
 
 #### [module cookie-session](#apidoc.module.cookie-session)
+1.  [function <span class="apidocSignatureSpan"></span>cookie-session (options)](#apidoc.element.cookie-session.cookie-session)
+1.  [function <span class="apidocSignatureSpan">cookie-session.</span>toString ()](#apidoc.element.cookie-session.toString)
 
 
 
 # <a name="apidoc.module.cookie-session"></a>[module cookie-session](#apidoc.module.cookie-session)
+
+#### <a name="apidoc.element.cookie-session.cookie-session"></a>[function <span class="apidocSignatureSpan"></span>cookie-session (options)](#apidoc.element.cookie-session.cookie-session)
+- description and source-code
+```javascript
+function cookieSession(options) {
+  var opts = options || {}
+
+  // name - previously "opts.key"
+  var name = opts.name || opts.key || 'express:sess';
+
+  // secrets
+  var keys = opts.keys;
+  if (!keys && opts.secret) keys = [opts.secret];
+
+  // defaults
+  if (null == opts.overwrite) opts.overwrite = true;
+  if (null == opts.httpOnly) opts.httpOnly = true;
+  if (null == opts.signed) opts.signed = true;
+
+  if (!keys && opts.signed) throw new Error('.keys required.');
+
+  debug('session options %j', opts);
+
+  return function _cookieSession(req, res, next) {
+    var cookies = req.sessionCookies = new Cookies(req, res, keys);
+    var sess, json;
+
+    // to pass to Session()
+    req.sessionOptions = Object.create(opts)
+    req.sessionKey = name
+
+    req.__defineGetter__('session', function(){
+      // already retrieved
+      if (sess) return sess;
+
+      // unset
+      if (false === sess) return null;
+
+      json = cookies.get(name, req.sessionOptions)
+
+      if (json) {
+        debug('parse %s', json);
+        try {
+          sess = new Session(req, decode(json));
+        } catch (err) {
+          // backwards compatibility:
+          // create a new session if parsing fails.
+          // new Buffer(string, 'base64') does not seem to crash
+          // when 'string' is not base64-encoded.
+          // but 'JSON.parse(string)' will crash.
+          if (!(err instanceof SyntaxError)) throw err;
+          sess = new Session(req);
+        }
+      } else {
+        debug('new session');
+        sess = new Session(req);
+      }
+
+      return sess;
+    });
+
+    req.__defineSetter__('session', function(val){
+      if (null == val) return sess = false;
+      if ('object' == typeof val) return sess = new Session(req, val);
+      throw new Error('req.session can only be set as null or an object.');
+    });
+
+    onHeaders(res, function setHeaders() {
+      if (sess === undefined) {
+        // not accessed
+        return;
+      }
+
+      try {
+        if (sess === false) {
+          // remove
+          cookies.set(name, '', req.sessionOptions)
+        } else if (!json && !sess.length) {
+          // do nothing if new and not populated
+        } else if (sess.changed(json)) {
+          // save
+          sess.save();
+        }
+      } catch (e) {
+        debug('error saving session %s', e.message);
+      }
+    });
+
+    next();
+  }
+}
+```
+- example usage
+```shell
+n/a
+```
+
+#### <a name="apidoc.element.cookie-session.toString"></a>[function <span class="apidocSignatureSpan">cookie-session.</span>toString ()](#apidoc.element.cookie-session.toString)
+- description and source-code
+```javascript
+toString = function () {
+    return toString;
+}
+```
+- example usage
+```shell
+...
+*
+* @param {String} string
+* @return {Object}
+* @private
+*/
+
+function decode(string) {
+ var body = new Buffer(string, 'base64').toString('utf8');
+ return JSON.parse(body);
+}
+
+/**
+* Encode an object into a base64-encoded JSON string.
+*
+* @param {Object} body
+...
+```
 
 
 
