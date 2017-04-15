@@ -1,4 +1,4 @@
-<div class="apidocDiv">
+<html><head></head><body><div class="apidocDiv">
 <style>
 /*csslint
 */
@@ -47,17 +47,10 @@
 }
 </style>
 <h1>api documentation for
-    <a
-
-        href="https://github.com/expressjs/cookie-session"
-
-    >cookie-session (v1.2.0)</a>
+    <a href="https://github.com/expressjs/cookie-session">cookie-session (v1.2.0)</a>
 </h1>
 <h4>cookie session middleware</h4>
-<div class="apidocSectionDiv"><a
-    href="#apidoc.tableOfContents"
-    id="apidoc.tableOfContents"
-><h1>table of contents</h1></a><ol>
+<div class="apidocSectionDiv"><a href="#apidoc.tableOfContents" id="apidoc.tableOfContents"><h1>table of contents</h1></a><ol>
 
     <li class="apidocModuleLi"><a href="#apidoc.module.cookie-session">module cookie-session</a><ol>
 
@@ -97,21 +90,21 @@
     <li>description and source-code<pre class="apidocCodePre">function cookieSession(options) {
   var opts = options || {}
 
-  // name - previously &#x22;opts.key&#x22;
-  var name = opts.name || opts.key || &#x27;express:sess&#x27;;
+  // name - previously "opts.key"
+  var name = opts.name || opts.key || 'express:sess';
 
   // secrets
   var keys = opts.keys;
-  if (!keys &#x26;&#x26; opts.secret) keys = [opts.secret];
+  if (!keys &amp;&amp; opts.secret) keys = [opts.secret];
 
   // defaults
   if (null == opts.overwrite) opts.overwrite = true;
   if (null == opts.httpOnly) opts.httpOnly = true;
   if (null == opts.signed) opts.signed = true;
 
-  if (!keys &#x26;&#x26; opts.signed) throw new Error(&#x27;.keys required.&#x27;);
+  if (!keys &amp;&amp; opts.signed) throw new Error('.keys required.');
 
-  debug(&#x27;session options %j&#x27;, opts);
+  debug('session options %j', opts);
 
   return function _cookieSession(req, res, next) {
     var cookies = req.sessionCookies = new Cookies(req, res, keys);
@@ -121,7 +114,7 @@
     req.sessionOptions = Object.create(opts)
     req.sessionKey = name
 
-    req.__defineGetter__(&#x27;session&#x27;, function(){
+    req.__defineGetter__('session', function(){
       // already retrieved
       if (sess) return sess;
 
@@ -131,30 +124,30 @@
       json = cookies.get(name, req.sessionOptions)
 
       if (json) {
-        debug(&#x27;parse %s&#x27;, json);
+        debug('parse %s', json);
         try {
           sess = new Session(req, decode(json));
         } catch (err) {
           // backwards compatibility:
           // create a new session if parsing fails.
-          // new Buffer(string, &#x27;base64&#x27;) does not seem to crash
+          // new Buffer(string, 'base64') does not seem to crash
           // when `string` is not base64-encoded.
           // but `JSON.parse(string)` will crash.
           if (!(err instanceof SyntaxError)) throw err;
           sess = new Session(req);
         }
       } else {
-        debug(&#x27;new session&#x27;);
+        debug('new session');
         sess = new Session(req);
       }
 
       return sess;
     });
 
-    req.__defineSetter__(&#x27;session&#x27;, function(val){
+    req.__defineSetter__('session', function(val){
       if (null == val) return sess = false;
-      if (&#x27;object&#x27; == typeof val) return sess = new Session(req, val);
-      throw new Error(&#x27;req.session can only be set as null or an object.&#x27;);
+      if ('object' == typeof val) return sess = new Session(req, val);
+      throw new Error('req.session can only be set as null or an object.');
     });
 
     onHeaders(res, function setHeaders() {
@@ -166,15 +159,15 @@
       try {
         if (sess === false) {
           // remove
-          cookies.set(name, &#x27;&#x27;, req.sessionOptions)
-        } else if (!json &#x26;&#x26; !sess.length) {
+          cookies.set(name, '', req.sessionOptions)
+        } else if (!json &amp;&amp; !sess.length) {
           // do nothing if new and not populated
         } else if (sess.changed(json)) {
           // save
           sess.save();
         }
       } catch (e) {
-        debug(&#x27;error saving session %s&#x27;, e.message);
+        debug('error saving session %s', e.message);
       }
     });
 
@@ -204,7 +197,7 @@
 */
 
 function decode(string) {
- var body = new Buffer(string, &#x27;base64&#x27;).<span class="apidocCodeKeywordSpan">toString</span>(&#x27;utf8&#x27;);
+ var body = new Buffer(string, 'base64').<span class="apidocCodeKeywordSpan">toString</span>('utf8');
  return JSON.parse(body);
 }
 
@@ -224,3 +217,4 @@ function decode(string) {
     ]
 </div>
 </div>
+</body></html>

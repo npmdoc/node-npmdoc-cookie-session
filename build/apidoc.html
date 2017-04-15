@@ -61,12 +61,160 @@
 
     <li class="apidocModuleLi"><a href="#apidoc.module.cookie-session">module cookie-session</a><ol>
 
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.cookie-session.cookie-session">
+            function <span class="apidocSignatureSpan"></span>cookie-session
+            <span class="apidocSignatureSpan">(options)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.cookie-session.toString">
+            function <span class="apidocSignatureSpan">cookie-session.</span>toString
+            <span class="apidocSignatureSpan">()</span>
+            </a>
+
+        </li>
+
     </ol></li>
 
 </ol></div>
 
 <div class="apidocSectionDiv">
 <h1><a href="#apidoc.module.cookie-session" id="apidoc.module.cookie-session">module cookie-session</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.cookie-session.cookie-session" id="apidoc.element.cookie-session.cookie-session">
+        function <span class="apidocSignatureSpan"></span>cookie-session
+        <span class="apidocSignatureSpan">(options)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function cookieSession(options) {
+  var opts = options || {}
+
+  // name - previously &#x22;opts.key&#x22;
+  var name = opts.name || opts.key || &#x27;express:sess&#x27;;
+
+  // secrets
+  var keys = opts.keys;
+  if (!keys &#x26;&#x26; opts.secret) keys = [opts.secret];
+
+  // defaults
+  if (null == opts.overwrite) opts.overwrite = true;
+  if (null == opts.httpOnly) opts.httpOnly = true;
+  if (null == opts.signed) opts.signed = true;
+
+  if (!keys &#x26;&#x26; opts.signed) throw new Error(&#x27;.keys required.&#x27;);
+
+  debug(&#x27;session options %j&#x27;, opts);
+
+  return function _cookieSession(req, res, next) {
+    var cookies = req.sessionCookies = new Cookies(req, res, keys);
+    var sess, json;
+
+    // to pass to Session()
+    req.sessionOptions = Object.create(opts)
+    req.sessionKey = name
+
+    req.__defineGetter__(&#x27;session&#x27;, function(){
+      // already retrieved
+      if (sess) return sess;
+
+      // unset
+      if (false === sess) return null;
+
+      json = cookies.get(name, req.sessionOptions)
+
+      if (json) {
+        debug(&#x27;parse %s&#x27;, json);
+        try {
+          sess = new Session(req, decode(json));
+        } catch (err) {
+          // backwards compatibility:
+          // create a new session if parsing fails.
+          // new Buffer(string, &#x27;base64&#x27;) does not seem to crash
+          // when `string` is not base64-encoded.
+          // but `JSON.parse(string)` will crash.
+          if (!(err instanceof SyntaxError)) throw err;
+          sess = new Session(req);
+        }
+      } else {
+        debug(&#x27;new session&#x27;);
+        sess = new Session(req);
+      }
+
+      return sess;
+    });
+
+    req.__defineSetter__(&#x27;session&#x27;, function(val){
+      if (null == val) return sess = false;
+      if (&#x27;object&#x27; == typeof val) return sess = new Session(req, val);
+      throw new Error(&#x27;req.session can only be set as null or an object.&#x27;);
+    });
+
+    onHeaders(res, function setHeaders() {
+      if (sess === undefined) {
+        // not accessed
+        return;
+      }
+
+      try {
+        if (sess === false) {
+          // remove
+          cookies.set(name, &#x27;&#x27;, req.sessionOptions)
+        } else if (!json &#x26;&#x26; !sess.length) {
+          // do nothing if new and not populated
+        } else if (sess.changed(json)) {
+          // save
+          sess.save();
+        }
+      } catch (e) {
+        debug(&#x27;error saving session %s&#x27;, e.message);
+      }
+    });
+
+    next();
+  }
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.cookie-session.toString" id="apidoc.element.cookie-session.toString">
+        function <span class="apidocSignatureSpan">cookie-session.</span>toString
+        <span class="apidocSignatureSpan">()</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">toString = function () {
+    return toString;
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+*
+* @param {String} string
+* @return {Object}
+* @private
+*/
+
+function decode(string) {
+ var body = new Buffer(string, &#x27;base64&#x27;).<span class="apidocCodeKeywordSpan">toString</span>(&#x27;utf8&#x27;);
+ return JSON.parse(body);
+}
+
+/**
+* Encode an object into a base64-encoded JSON string.
+*
+* @param {Object} body
+...</pre></li>
+    </ul>
+
 
 </div>
 
