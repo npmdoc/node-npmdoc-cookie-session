@@ -1,4 +1,7 @@
-# api documentation for  [cookie-session (v1.2.0)](https://github.com/expressjs/cookie-session)  [![npm package](https://img.shields.io/npm/v/npmdoc-cookie-session.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-cookie-session) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-cookie-session.svg)](https://travis-ci.org/npmdoc/node-npmdoc-cookie-session)
+# npmdoc-cookie-session
+
+#### basic api documentation for  [cookie-session (v1.2.0)](https://github.com/expressjs/cookie-session)  [![npm package](https://img.shields.io/npm/v/npmdoc-cookie-session.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-cookie-session) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-cookie-session.svg)](https://travis-ci.org/npmdoc/node-npmdoc-cookie-session)
+
 #### cookie session middleware
 
 [![NPM](https://nodei.co/npm/cookie-session.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/cookie-session)
@@ -84,7 +87,8 @@
         "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --check-leaks --reporter dot test/",
         "test-travis": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --check-leaks --reporter spec test/"
     },
-    "version": "1.2.0"
+    "version": "1.2.0",
+    "bin": {}
 }
 ```
 

@@ -1,7 +1,7 @@
 {
     "author": "kai zhu <kaizhu256@gmail.com>",
     "buildNpmdoc": "cookie-session",
-    "description": "api documentation for [cookie-session (v1.2.0)](https://github.com/expressjs/cookie-session) [![npm package](https://img.shields.io/npm/v/npmdoc-cookie-session.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-cookie-session) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-cookie-session.svg)](https://travis-ci.org/npmdoc/node-npmdoc-cookie-session)",
+    "description": "#### basic api documentation for  [cookie-session (v1.2.0)](https://github.com/expressjs/cookie-session)  [![npm package](https://img.shields.io/npm/v/npmdoc-cookie-session.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-cookie-session) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-cookie-session.svg)](https://travis-ci.org/npmdoc/node-npmdoc-cookie-session)",
     "devDependencies": {
         "cookie-session": "*",
         "electron-lite": "kaizhu256/node-electron-lite#alpha",
